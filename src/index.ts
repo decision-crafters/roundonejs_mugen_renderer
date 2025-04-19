@@ -1,5 +1,12 @@
 export {Resource} from './resource';
 export {Player} from './player';
 export {RoundOneJSApp} from './app';
+export {AIController, AIPersonality, AIDecision} from './ai/AIController';
+export {AIPlayer} from './ai/AIPlayer';
+export {OpenRouterClient, GameState, AIResponse} from './openrouter/OpenRouterClient';
+export {OpenRouterAIController} from './ai/OpenRouterAIController';
+export {ArcadeMode, ArcadeLength, ArcadeStage} from './arcade/ArcadeMode';
+export {CharacterGenerator, CharacterTemplate, CharacterResource} from './character-generator/CharacterGenerator';
+export {ModelTester, ModelTestResult} from './openrouter/ModelTester';
 export {BackgroundGenerator} from './background-generator/BackgroundGenerator';
 export {BackgroundType, FalBackground} from './background-generator/types';

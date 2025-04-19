@@ -59,7 +59,6 @@ export class RoundOneJSApp {
         });
     }
 
-    // Create the canvas
     createCanvas() {
         var canvas = document.createElement('canvas');
         canvas.width = this.canvasWidth * this.zoom;
@@ -72,6 +71,10 @@ export class RoundOneJSApp {
         var now = Date.now();
         var dt = (now - this.lastTime) / 1000.0;
         this.fps = Math.ceil(1000 / (now - this.lastTime));
+        
+        if (this.player1.aiControlled) this.player1.update();
+        if (this.player2.aiControlled) this.player2.update();
+        
         this.render();
 
         this.lastTime = now;
@@ -85,15 +88,12 @@ export class RoundOneJSApp {
         this.main();
     }
 
-    // Draw everything
     render() {
         this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-        // Player 1
         this.renderPlayer(this.player1);
         this.renderPlayer(this.player2);
 
-        // Infos debug
         var text = 'FPS:' + this.fps + ' - action:' + this.player1.action;
 
         this.ctx.fillStyle = '#000';
@@ -120,7 +120,6 @@ export class RoundOneJSApp {
         );
         var width = player.right === 1 ? 0 : image.width;
 
-        // Fill image
         this.ctx.drawImage(
             image,
             (
@@ -130,10 +129,8 @@ export class RoundOneJSApp {
             player.pos.y - player.SFF.images[i].y
         );
 
-        /*
-        // Fill collision box // TODO Wrong in scale
         if (player.AIR[player.action].clsn2Default) {
-            var clsn = player.AIR[action].clsn2Default;
+            var clsn = player.AIR[player.action].clsn2Default;
         } else if (
             player.AIR[player.action].elements[player.currentFrame].clsn2
         ) {
@@ -147,13 +144,13 @@ export class RoundOneJSApp {
                 var y = player.pos.y + clsn[i].y ;
                 var width = clsn[i].x2 - clsn[i].x;
                 var height = clsn[i].y2 - clsn[i].y;
-                ctx.fillStyle = 'rgba(0,0,255,0.2)';
-                ctx.fillRect(player.right * x, y, player.right * width, height);
+                this.ctx.fillStyle = 'rgba(0,0,255,0.2)';
+                this.ctx.fillRect(player.right * x, y, player.right * width, height);
             }
         }
-        */
 
-        // Fill pos
+        this.checkHitCollision(player);
+
         /*
         ctx.fillStyle = '#ff0000';
         ctx.fillRect(player.right * player.pos.x, player.pos.y, 1, 1);
@@ -176,7 +173,54 @@ export class RoundOneJSApp {
         this.ctx.restore();
     }
 
-    // Reset game to original state
+    private checkHitCollision(attacker) {
+        const defender = attacker === this.player1 ? this.player2 : this.player1;
+        
+        let attackBox = null;
+        if (attacker.AIR[attacker.action].elements[attacker.currentFrame].clsn1) {
+            attackBox = attacker.AIR[attacker.action].elements[attacker.currentFrame].clsn1;
+        }
+        
+        let defenseBox = null;
+        if (defender.AIR[defender.action].clsn2Default) {
+            defenseBox = defender.AIR[defender.action].clsn2Default;
+        } else if (defender.AIR[defender.action].elements[defender.currentFrame].clsn2) {
+            defenseBox = defender.AIR[defender.action].elements[defender.currentFrame].clsn2;
+        }
+        
+        if (attackBox && defenseBox) {
+            for (let i = 0; i < attackBox.length; i++) {
+                for (let j = 0; j < defenseBox.length; j++) {
+                    if (this.boxesCollide(
+                        attacker.pos.x + attackBox[i].x * attacker.right, 
+                        attacker.pos.y + attackBox[i].y,
+                        attackBox[i].x2 - attackBox[i].x,
+                        attackBox[i].y2 - attackBox[i].y,
+                        defender.pos.x + defenseBox[j].x * defender.right,
+                        defender.pos.y + defenseBox[j].y,
+                        defenseBox[j].x2 - defenseBox[j].x,
+                        defenseBox[j].y2 - defenseBox[j].y
+                    )) {
+                        this.applyHit(attacker, defender);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    private boxesCollide(x1, y1, w1, h1, x2, y2, w2, h2) {
+        return !(x1 + w1 < x2 || x2 + w2 < x1 || y1 + h1 < y2 || y2 + h2 < y1);
+    }
+
+    private applyHit(attacker, defender) {
+        const damage = 5; // Basic damage, can be refined based on action type
+        defender.takeDamage(damage);
+        
+        const knockback = 10 * attacker.right;
+        defender.pos.x += knockback;
+    }
+
     reset() {
         this.isGameOver = false;
         this.gameTime = 0;
