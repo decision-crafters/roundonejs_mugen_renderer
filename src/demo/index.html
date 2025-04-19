@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RoundOneJS Mugen Renderer - AI Integration Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #222;
+      color: #fff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .control-group {
+      background-color: #333;
+      padding: 15px;
+      border-radius: 5px;
+      flex: 1;
+      min-width: 250px;
+    }
+    h1, h2 {
+      color: #f8f8f8;
+    }
+    button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    select, input {
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 4px;
+      border: 1px solid #555;
+      background-color: #444;
+      color: #fff;
+    }
+    .health-bar {
+      height: 20px;
+      background-color: #333;
+      margin-top: 10px;
+      position: relative;
+    }
+    .health-bar-fill {
+      height: 100%;
+      background-color: #4CAF50;
+      transition: width 0.3s;
+    }
+    .health-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      line-height: 20px;
+      color: white;
+      font-weight: bold;
+      text-shadow: 1px 1px 1px black;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>RoundOneJS Mugen Renderer - AI Integration Demo</h1>
+    
+    <div id="game-container"></div>
+    
+    <div class="health-bars">
+      <div>
+        <span>Player 1</span>
+        <div class="health-bar">
+          <div id="p1-health" class="health-bar-fill" style="width: 100%;"></div>
+          <div class="health-text">100/100</div>
+        </div>
+      </div>
+      <div>
+        <span>Player 2</span>
+        <div class="health-bar">
+          <div id="p2-health" class="health-bar-fill" style="width: 100%;"></div>
+          <div class="health-text">100/100</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <div class="control-group">
+        <h2>AI Controls</h2>
+        <div style="margin-bottom: 15px; border-bottom: 1px solid #555; padding-bottom: 10px;">
+          <h3>Player 1</h3>
+          <div>
+            <label for="p1-ai-personality">AI Personality:</label>
+            <select id="p1-ai-personality">
+              <option value="balanced">Balanced</option>
+              <option value="aggressive">Aggressive</option>
+              <option value="defensive">Defensive</option>
+            </select>
+          </div>
+          <div>
+            <label for="p1-ai-model">OpenRouter Model:</label>
+            <select id="p1-ai-model">
+              <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
+              <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet</option>
+              <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
+              <option value="openai/gpt-4o">GPT-4o</option>
+              <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            </select>
+          </div>
+          <div>
+            <button id="p1-toggle-ai">Enable AI Control</button>
+            <button id="p1-use-openrouter">Use OpenRouter</button>
+          </div>
+        </div>
+        
+        <div>
+          <h3>Player 2</h3>
+          <div>
+            <label for="p2-ai-personality">AI Personality:</label>
+            <select id="p2-ai-personality">
+              <option value="balanced">Balanced</option>
+              <option value="aggressive">Aggressive</option>
+              <option value="defensive">Defensive</option>
+            </select>
+          </div>
+          <div>
+            <label for="p2-ai-model">OpenRouter Model:</label>
+            <select id="p2-ai-model">
+              <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
+              <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet</option>
+              <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
+              <option value="openai/gpt-4o">GPT-4o</option>
+              <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            </select>
+          </div>
+          <div>
+            <button id="p2-toggle-ai">Enable AI Control</button>
+            <button id="p2-use-openrouter">Use OpenRouter</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <h2>Game Modes</h2>
+        <div>
+          <button id="vs-mode">VS Mode</button>
+          <button id="arcade-mode">Arcade Mode</button>
+        </div>
+        <div>
+          <label for="arcade-length">Arcade Length:</label>
+          <select id="arcade-length">
+            <option value="short">Short (3 stages)</option>
+            <option value="medium">Medium (6 stages)</option>
+            <option value="long">Long (10 stages)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <h2>Character Generator</h2>
+        <button id="generate-character">Generate Random Character</button>
+        <div>
+          <label for="character-name">Name:</label>
+          <input type="text" id="character-name" placeholder="Character Name">
+        </div>
+        <button id="apply-character">Apply to Player 1</button>
+      </div>
+      
+      <div class="control-group">
+        <h2>Model Testing</h2>
+        <button id="test-models">Test Selected Model</button>
+        <div>
+          <label for="test-matches">Number of Matches:</label>
+          <input type="number" id="test-matches" value="10" min="1" max="100">
+        </div>
+        <button id="generate-report">Generate Report</button>
+      </div>
+    </div>
+    
+    <div id="report-container" style="margin-top: 20px; background-color: #333; padding: 15px; border-radius: 5px; display: none;">
+      <h2>Test Results</h2>
+      <pre id="report-content" style="white-space: pre-wrap; overflow-x: auto;"></pre>
+    </div>
+  </div>
+  
+  <script type="text/javascript" src="../../lib/index.js"></script>
+  <script>
+    // Demo implementation would go here
+    // This would initialize the RoundOneJS app and connect all the AI components
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize game
+      const gameContainer = document.getElementById('game-container');
+      const app = new RoundOneJS.RoundOneJSApp(gameContainer);
+      
+      // Health bar updates
+      function updateHealthBars() {
+        const p1Health = document.getElementById('p1-health');
+        const p2Health = document.getElementById('p2-health');
+        const p1Text = p1Health.nextElementSibling;
+        const p2Text = p2Health.nextElementSibling;
+        
+        const p1Percent = (app.player1.health / app.player1.maxHealth) * 100;
+        const p2Percent = (app.player2.health / app.player2.maxHealth) * 100;
+        
+        p1Health.style.width = p1Percent + '%';
+        p2Health.style.width = p2Percent + '%';
+        
+        p1Text.textContent = `${app.player1.health}/${app.player1.maxHealth}`;
+        p2Text.textContent = `${app.player2.health}/${app.player2.maxHealth}`;
+        
+        // Change color based on health
+        if (p1Percent < 30) {
+          p1Health.style.backgroundColor = '#f44336';
+        } else if (p1Percent < 60) {
+          p1Health.style.backgroundColor = '#ff9800';
+        } else {
+          p1Health.style.backgroundColor = '#4CAF50';
+        }
+        
+        if (p2Percent < 30) {
+          p2Health.style.backgroundColor = '#f44336';
+        } else if (p2Percent < 60) {
+          p2Health.style.backgroundColor = '#ff9800';
+        } else {
+          p2Health.style.backgroundColor = '#4CAF50';
+        }
+      }
+      
+      // AI Controls for Player 1
+      const p1AiPersonalitySelect = document.getElementById('p1-ai-personality');
+      const p1AiModelSelect = document.getElementById('p1-ai-model');
+      const p1ToggleAiButton = document.getElementById('p1-toggle-ai');
+      const p1UseOpenRouterButton = document.getElementById('p1-use-openrouter');
+      
+      // AI Controls for Player 2
+      const p2AiPersonalitySelect = document.getElementById('p2-ai-personality');
+      const p2AiModelSelect = document.getElementById('p2-ai-model');
+      const p2ToggleAiButton = document.getElementById('p2-toggle-ai');
+      const p2UseOpenRouterButton = document.getElementById('p2-use-openrouter');
+      
+      // AI state
+      let p1AiEnabled = false;
+      let p1UsingOpenRouter = false;
+      let p2AiEnabled = false;
+      let p2UsingOpenRouter = false;
+      
+      // Player 1 AI Toggle
+      p1ToggleAiButton.addEventListener('click', function() {
+        p1AiEnabled = !p1AiEnabled;
+        p1ToggleAiButton.textContent = p1AiEnabled ? 'Disable AI Control' : 'Enable AI Control';
+        
+        if (p1AiEnabled) {
+          // Create AI player
+          const personality = p1AiPersonalitySelect.value;
+          app.player1 = new RoundOneJS.AIPlayer(app.player1.resource, app.player2);
+          app.player1.aiController.setPersonality(RoundOneJS.AIPersonality[personality.toUpperCase()]);
+        } else {
+          // Reset to normal player
+          app.player1 = new RoundOneJS.Player(app.player1.resource);
+        }
+      });
+      
+      // Player 1 OpenRouter Toggle
+      p1UseOpenRouterButton.addEventListener('click', function() {
+        if (!p1AiEnabled) {
+          alert('Please enable AI control for Player 1 first');
+          return;
+        }
+        
+        p1UsingOpenRouter = !p1UsingOpenRouter;
+        p1UseOpenRouterButton.textContent = p1UsingOpenRouter ? 'Use Built-in AI' : 'Use OpenRouter';
+        
+        if (p1UsingOpenRouter) {
+          const apiKey = process.env.OPENROUTER_API_KEY;
+          const modelId = p1AiModelSelect.value;
+          const personality = p1AiPersonalitySelect.value;
+          
+          // Create OpenRouter AI player
+          app.player1 = new RoundOneJS.AIPlayer(app.player1.resource, app.player2);
+          app.player1.aiController = new RoundOneJS.OpenRouterAIController(
+            app.player1,
+            app.player2,
+            apiKey,
+            modelId,
+            RoundOneJS.AIPersonality[personality.toUpperCase()]
+          );
+        } else {
+          // Reset to normal AI player
+          app.player1 = new RoundOneJS.AIPlayer(app.player1.resource, app.player2);
+          const personality = p1AiPersonalitySelect.value;
+          app.player1.aiController.setPersonality(RoundOneJS.AIPersonality[personality.toUpperCase()]);
+        }
+      });
+      
+      // Player 2 AI Toggle
+      p2ToggleAiButton.addEventListener('click', function() {
+        p2AiEnabled = !p2AiEnabled;
+        p2ToggleAiButton.textContent = p2AiEnabled ? 'Disable AI Control' : 'Enable AI Control';
+        
+        if (p2AiEnabled) {
+          // Create AI player
+          const personality = p2AiPersonalitySelect.value;
+          app.player2 = new RoundOneJS.AIPlayer(app.player2.resource, app.player1);
+          app.player2.aiController.setPersonality(RoundOneJS.AIPersonality[personality.toUpperCase()]);
+        } else {
+          // Reset to normal player
+          app.player2 = new RoundOneJS.Player(app.player2.resource);
+        }
+      });
+      
+      // Player 2 OpenRouter Toggle
+      p2UseOpenRouterButton.addEventListener('click', function() {
+        if (!p2AiEnabled) {
+          alert('Please enable AI control for Player 2 first');
+          return;
+        }
+        
+        p2UsingOpenRouter = !p2UsingOpenRouter;
+        p2UseOpenRouterButton.textContent = p2UsingOpenRouter ? 'Use Built-in AI' : 'Use OpenRouter';
+        
+        if (p2UsingOpenRouter) {
+          const apiKey = process.env.OPENROUTER_API_KEY;
+          const modelId = p2AiModelSelect.value;
+          const personality = p2AiPersonalitySelect.value;
+          
+          // Create OpenRouter AI player
+          app.player2 = new RoundOneJS.AIPlayer(app.player2.resource, app.player1);
+          app.player2.aiController = new RoundOneJS.OpenRouterAIController(
+            app.player2,
+            app.player1,
+            apiKey,
+            modelId,
+            RoundOneJS.AIPersonality[personality.toUpperCase()]
+          );
+        } else {
+          // Reset to normal AI player
+          app.player2 = new RoundOneJS.AIPlayer(app.player2.resource, app.player1);
+          const personality = p2AiPersonalitySelect.value;
+          app.player2.aiController.setPersonality(RoundOneJS.AIPersonality[personality.toUpperCase()]);
+        }
+      });
+      
+      // Game Modes
+      const vsModeButton = document.getElementById('vs-mode');
+      const arcadeModeButton = document.getElementById('arcade-mode');
+      const arcadeLengthSelect = document.getElementById('arcade-length');
+      
+      let arcadeMode = null;
+      
+      vsModeButton.addEventListener('click', function() {
+        arcadeMode = null;
+        app.reset();
+      });
+      
+      arcadeModeButton.addEventListener('click', function() {
+        const length = arcadeLengthSelect.value;
+        arcadeMode = new RoundOneJS.ArcadeMode(
+          app,
+          app.player1,
+          '/characters',
+          RoundOneJS.ArcadeLength[length.toUpperCase()]
+        );
+        
+        arcadeMode.startArcade(() => {
+          console.log('Arcade mode started');
+        });
+      });
+      
+      // Character Generator
+      const generateCharacterButton = document.getElementById('generate-character');
+      const characterNameInput = document.getElementById('character-name');
+      const applyCharacterButton = document.getElementById('apply-character');
+      
+      let characterGenerator = new RoundOneJS.CharacterGenerator();
+      let generatedCharacter = null;
+      
+      generateCharacterButton.addEventListener('click', function() {
+        generatedCharacter = characterGenerator.generateRandomCharacter();
+        characterNameInput.value = generatedCharacter.name;
+        alert(`Generated character: ${generatedCharacter.name}`);
+      });
+      
+      applyCharacterButton.addEventListener('click', function() {
+        if (!generatedCharacter) {
+          alert('Please generate a character first');
+          return;
+        }
+        
+        // In a real implementation, this would apply the character to player1
+        alert(`Applied character ${generatedCharacter.name} to Player 1`);
+      });
+      
+      // Model Testing
+      const testModelsButton = document.getElementById('test-models');
+      const testMatchesInput = document.getElementById('test-matches');
+      const generateReportButton = document.getElementById('generate-report');
+      const reportContainer = document.getElementById('report-container');
+      const reportContent = document.getElementById('report-content');
+      
+      let modelTester = null;
+      
+      testModelsButton.addEventListener('click', function() {
+        const apiKey = process.env.OPENROUTER_API_KEY;
+        const modelId = aiModelSelect.value;
+        const numMatches = parseInt(testMatchesInput.value);
+        
+        if (!modelTester) {
+          modelTester = new RoundOneJS.ModelTester(apiKey, app);
+        }
+        
+        modelTester.addModel(modelId);
+        
+        alert(`Testing model ${modelId} with ${numMatches} matches. This may take some time.`);
+        
+        modelTester.testModel(modelId, numMatches)
+          .then(result => {
+            alert(`Testing complete! Generate a report to see results.`);
+          })
+          .catch(error => {
+            alert(`Error testing model: ${error.message}`);
+          });
+      });
+      
+      generateReportButton.addEventListener('click', function() {
+        if (!modelTester) {
+          alert('Please test a model first');
+          return;
+        }
+        
+        const report = modelTester.generateReport();
+        reportContent.textContent = report;
+        reportContainer.style.display = 'block';
+      });
+      
+      // Game loop
+      function gameLoop() {
+        // Update health bars
+        updateHealthBars();
+        
+        // Request next frame
+        requestAnimationFrame(gameLoop);
+      }
+      
+      // Start game loop
+      gameLoop();
+    });
+  </script>
+</body>
+</html>

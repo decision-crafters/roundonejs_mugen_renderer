@@ -41,6 +41,45 @@ The project includes a comprehensive demo that showcases these research areas:
 - Arcade mode with dynamic difficulty can be experienced
 - Model testing framework provides performance metrics
 
+### OpenRouter API Integration
+
+This project uses OpenRouter to connect with various AI models for enhanced decision-making. To set up the OpenRouter integration:
+
+1. **Get an API Key**:
+   - Create an account at [OpenRouter](https://openrouter.ai/)
+   - Generate an API key from your dashboard
+
+2. **Set Up Environment Variable**:
+   - Set the `OPENROUTER_API_KEY` environment variable with your API key:
+     ```bash
+     # Linux/macOS
+     export OPENROUTER_API_KEY="your-api-key-here"
+     
+     # Windows (Command Prompt)
+     set OPENROUTER_API_KEY=your-api-key-here
+     
+     # Windows (PowerShell)
+     $env:OPENROUTER_API_KEY="your-api-key-here"
+     ```
+
+3. **Alternative Configuration**:
+   - You can also modify `src/openrouter/config.ts` to include your API key directly:
+     ```typescript
+     export const OPENROUTER_CONFIG = {
+       API_KEY: "your-api-key-here", // Replace with your actual API key
+       DEFAULT_MODEL: 'anthropic/claude-3-opus',
+       API_ENDPOINT: 'https://openrouter.ai/api/v1/chat/completions'
+     };
+     ```
+   - Note: Storing API keys directly in code is not recommended for production environments
+
+4. **Available Models**:
+   - The demo includes support for various models including:
+     - Claude 3 Opus (`anthropic/claude-3-opus`)
+     - Claude 3 Sonnet (`anthropic/claude-3-sonnet`)
+     - GPT-4o (`openai/gpt-4o`)
+     - And other models available through OpenRouter
+
 ## About M.U.G.E.N.
 
 M.U.G.E.N is a 2D fighting game engine with many customizable components.
