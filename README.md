@@ -2,6 +2,103 @@
 
 This project use mugen's files format in JavaScript (DEF, AIR, SFF and ACT files) to display and animate into canvas.
 
+## AI Integration Research Project
+
+This project explores the integration of artificial intelligence into fighting games, using RoundOneJS as a platform for research and experimentation. The primary goal is to investigate how different AI models can be used to create engaging, dynamic, and challenging gameplay experiences.
+
+### Research Goals
+
+1. **AI-Controlled Combat System**
+   - Develop a built-in AI logic system that can analyze distances, detect opponent actions, and make strategic decisions
+   - Compare different AI personalities (aggressive, defensive, balanced) and their impact on gameplay
+   - Integrate external AI models via OpenRouter to enhance decision-making capabilities
+   - Study the effectiveness of AI in fighting game contexts
+
+2. **Model Comparison Framework**
+   - Create a testing framework to evaluate different AI models (Claude, GPT, etc.)
+   - Measure performance metrics such as win rate, decision quality, and response time
+   - Generate comparative reports to identify strengths and weaknesses of different models
+   - Explore the potential for AI model specialization in fighting games
+
+3. **Character Generation Research**
+   - Investigate procedural generation of fighting game characters
+   - Develop templates and balancing mechanisms for auto-generated characters
+   - Study the relationship between character design and AI performance
+   - Explore the creative potential of AI in character development
+
+4. **Arcade Mode & Dynamic Difficulty**
+   - Research dynamic difficulty adjustment based on player performance
+   - Implement story-driven progression with AI-generated narrative elements
+   - Study player engagement with AI-controlled opponents of varying difficulty
+   - Explore the potential for personalized gaming experiences
+
+### Demo Implementation
+
+The project includes a comprehensive demo that showcases these research areas:
+- Both players can be controlled by different AI models simultaneously
+- Multiple AI personalities and models can be selected and compared
+- Character generation capabilities can be tested
+- Arcade mode with dynamic difficulty can be experienced
+- Model testing framework provides performance metrics
+
+### OpenRouter API Integration
+
+This project uses OpenRouter to connect with various AI models for enhanced decision-making. To set up the OpenRouter integration:
+
+1. **Get an API Key**:
+   - Create an account at [OpenRouter](https://openrouter.ai/)
+   - Generate an API key from your dashboard
+
+2. **Set Up Environment Variable**:
+   - Set the `OPENROUTER_API_KEY` environment variable with your API key:
+     ```bash
+     # Linux/macOS
+     export OPENROUTER_API_KEY="your-api-key-here"
+     
+     # Windows (Command Prompt)
+     set OPENROUTER_API_KEY=your-api-key-here
+     
+     # Windows (PowerShell)
+     $env:OPENROUTER_API_KEY="your-api-key-here"
+     ```
+
+3. **Alternative Configuration**:
+   - You can also modify `src/openrouter/config.ts` to include your API key directly:
+     ```typescript
+     export const OPENROUTER_CONFIG = {
+       API_KEY: "your-api-key-here", // Replace with your actual API key
+       DEFAULT_MODEL: 'anthropic/claude-3-opus',
+       API_ENDPOINT: 'https://openrouter.ai/api/v1/chat/completions'
+     };
+     ```
+   - Note: Storing API keys directly in code is not recommended for production environments
+
+4. **Available Models**:
+   - The demo includes support for various models including:
+     - Claude 3 Opus (`anthropic/claude-3-opus`)
+     - Claude 3 Sonnet (`anthropic/claude-3-sonnet`)
+     - GPT-4o (`openai/gpt-4o`)
+     - And other models available through OpenRouter
+
+### Background Generation with fal.ai
+
+The demo includes integration with fal.ai for generating dynamic fighting game backgrounds:
+
+1. **Background Types**:
+   - Several preset background types (Dojo, Street, Castle, etc.)
+   - Custom backgrounds from text prompts
+   - Pixel art style optimized for fighting games
+
+2. **Integration Setup**:
+   - Get an API key from [fal.ai](https://fal.ai/)
+   - Set the `FAL_KEY` environment variable with your API key
+   - Use the Background Generator section in the demo to create backgrounds
+
+3. **Theme Customization**:
+   - Old-school Mugen theme with retro pixel aesthetics
+   - Dynamic backgrounds that affect both the game area and page theme
+   - Arcade-style UI elements and typography
+
 ## About M.U.G.E.N.
 
 M.U.G.E.N is a 2D fighting game engine with many customizable components.

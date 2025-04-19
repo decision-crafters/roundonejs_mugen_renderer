@@ -24,6 +24,10 @@
     "url": "https://github.com/roundonejs/roundonejs_mugen_renderer/issues"
   },
   "homepage": "https://github.com/roundonejs/roundonejs_mugen_renderer#readme",
+  "dependencies": {
+    "node-fetch": "^2.6.7",
+    "@fal-ai/client": "^0.7.0"
+  },
   "devDependencies": {
     "typescript": "^4.2.2"
   }
