@@ -21,6 +21,18 @@ export interface AIResponse {
   confidence: number;
 }
 
+export interface OpenRouterModel {
+  id: string;
+  name: string;
+  description: string;
+  context_length: number;
+  created: number;
+  pricing: {
+    prompt: string;
+    completion: string;
+  };
+}
+
 export class OpenRouterClient {
   private apiKey: string;
   private modelId: string;
@@ -153,5 +165,33 @@ export class OpenRouterClient {
   setModel(modelId: string): void {
     this.modelId = modelId;
     this.responseCache.clear();
+  }
+  
+  /**
+   * Fetches available models from the OpenRouter API
+   * @returns Promise<OpenRouterModel[]> - Array of available models
+   */
+  async getAvailableModels(): Promise<OpenRouterModel[]> {
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/models', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'HTTP-Referer': 'https://roundonejs-mugen-renderer.com',
+          'X-Title': 'RoundOneJS Mugen Renderer'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data && data.data) {
+        return data.data;
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Error fetching available models:', error);
+      return [];
+    }
   }
 }

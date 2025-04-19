@@ -198,7 +198,7 @@
     </div>
   </div>
   
-  <script type="text/javascript" src="../../lib/index.js"></script>
+  <script type="text/javascript" src="/lib/index.js"></script>
   <script>
     // Demo implementation would go here
     // This would initialize the RoundOneJS app and connect all the AI components
@@ -206,6 +206,91 @@
       // Initialize game
       const gameContainer = document.getElementById('game-container');
       const app = new RoundOneJS.RoundOneJSApp(gameContainer);
+      
+      // Load available models from OpenRouter API
+      async function loadAvailableModels() {
+        try {
+          const apiKey = process.env.OPENROUTER_API_KEY;
+          if (!apiKey) {
+            console.error('OpenRouter API key not found. Please set the OPENROUTER_API_KEY environment variable.');
+            return;
+          }
+          
+          const client = new RoundOneJS.OpenRouterClient(apiKey);
+          const models = await client.getAvailableModels();
+          
+          // Sort models by name
+          models.sort((a, b) => a.name.localeCompare(b.name));
+          
+          // Populate dropdowns
+          const p1ModelSelect = document.getElementById('p1-ai-model');
+          const p2ModelSelect = document.getElementById('p2-ai-model');
+          
+          // Clear existing options
+          p1ModelSelect.innerHTML = '';
+          p2ModelSelect.innerHTML = '';
+          
+          // Add loading message
+          const loadingOption = document.createElement('option');
+          loadingOption.textContent = 'Loading models...';
+          loadingOption.disabled = true;
+          loadingOption.selected = true;
+          p1ModelSelect.appendChild(loadingOption.cloneNode(true));
+          p2ModelSelect.appendChild(loadingOption);
+          
+          if (models.length === 0) {
+            const noModelsOption = document.createElement('option');
+            noModelsOption.textContent = 'No models available';
+            noModelsOption.disabled = true;
+            p1ModelSelect.innerHTML = '';
+            p2ModelSelect.innerHTML = '';
+            p1ModelSelect.appendChild(noModelsOption.cloneNode(true));
+            p2ModelSelect.appendChild(noModelsOption);
+            return;
+          }
+          
+          // Add options for each model
+          models.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.name;
+            
+            const option2 = option.cloneNode(true);
+            
+            p1ModelSelect.appendChild(option);
+            p2ModelSelect.appendChild(option2);
+          });
+          
+          // Remove loading message
+          if (p1ModelSelect.options[0].disabled) {
+            p1ModelSelect.removeChild(p1ModelSelect.options[0]);
+            p2ModelSelect.removeChild(p2ModelSelect.options[0]);
+          }
+          
+          // Select first option
+          if (p1ModelSelect.options.length > 0) {
+            p1ModelSelect.selectedIndex = 0;
+            p2ModelSelect.selectedIndex = 0;
+          }
+        } catch (error) {
+          console.error('Error loading models:', error);
+          const errorOption = document.createElement('option');
+          errorOption.textContent = 'Error loading models';
+          errorOption.disabled = true;
+          
+          const p1ModelSelect = document.getElementById('p1-ai-model');
+          const p2ModelSelect = document.getElementById('p2-ai-model');
+          
+          p1ModelSelect.innerHTML = '';
+          p2ModelSelect.innerHTML = '';
+          
+          p1ModelSelect.appendChild(errorOption.cloneNode(true));
+          p2ModelSelect.appendChild(errorOption);
+        }
+      }
+      
+      // Load models when page loads
+      loadAvailableModels();
       
       // Health bar updates
       function updateHealthBars() {
@@ -416,7 +501,7 @@
       
       testModelsButton.addEventListener('click', function() {
         const apiKey = process.env.OPENROUTER_API_KEY;
-        const modelId = aiModelSelect.value;
+        const modelId = p1AiModelSelect.value;
         const numMatches = parseInt(testMatchesInput.value);
         
         if (!modelTester) {
