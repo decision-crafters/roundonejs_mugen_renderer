@@ -2,6 +2,487 @@
 <html>
 <head>
   <title>RoundOneJS Mugen Renderer - AI Integration Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Mugen';
+      src: url('https://fonts.cdnfonts.com/s/55413/ARCADECLASSIC.TTF') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    
+    :root {
+      --primary-color: #00ffff;
+      --secondary-color: #ff00ff;
+      --accent-color: #ffff00;
+      --bg-color: #000033;
+      --bg-secondary: #000066;
+      --text-color: #ffffff;
+      --health-color: #00ff00;
+      --damage-color: #ff0000;
+    }
+    
+    body {
+      font-family: 'Press Start 2P', monospace;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      background-image: linear-gradient(rgba(0, 0, 51, 0.9), rgba(0, 0, 51, 0.9)), url('');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1 {
+      color: var(--primary-color);
+      text-shadow: 2px 2px 0 var(--secondary-color), 4px 4px 0 rgba(0,0,0,0.5);
+      text-transform: uppercase;
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 30px;
+      letter-spacing: 2px;
+    }
+    
+    h2 {
+      color: var(--accent-color);
+      text-shadow: 1px 1px 0 #000;
+      border-bottom: 2px solid var(--secondary-color);
+      padding-bottom: 5px;
+      font-size: 16px;
+    }
+    
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .control-group {
+      background-color: var(--bg-secondary);
+      padding: 15px;
+      border-radius: 0;
+      flex: 1;
+      min-width: 250px;
+      border: 2px solid var(--primary-color);
+      box-shadow: 0 0 10px var(--primary-color);
+    }
+    
+    button {
+      background-color: var(--secondary-color);
+      border: 2px solid var(--text-color);
+      color: var(--text-color);
+      padding: 10px 15px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 12px;
+      margin: 4px 2px;
+      cursor: pointer;
+      font-family: 'Press Start 2P', monospace;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    
+    button:hover {
+      background-color: var(--primary-color);
+      color: #000;
+      transform: scale(1.05);
+    }
+    
+    select, input {
+      padding: 8px;
+      margin: 5px 0;
+      border: 2px solid var(--primary-color);
+      background-color: #000;
+      color: var(--text-color);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+    }
+    
+    .health-bars {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+      gap: 20px;
+    }
+    
+    .health-bars > div {
+      flex: 1;
+    }
+    
+    .health-bar {
+      height: 20px;
+      background-color: #111;
+      margin-top: 10px;
+      position: relative;
+      border: 2px solid var(--primary-color);
+    }
+    
+    .health-bar-fill {
+      height: 100%;
+      background-color: var(--health-color);
+      transition: width 0.3s;
+      background-image: linear-gradient(to right, var(--health-color), #80ff80);
+    }
+    
+    .health-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      line-height: 20px;
+      color: var(--text-color);
+      font-weight: bold;
+      text-shadow: 1px 1px 1px black;
+      font-size: 8px;
+    }
+    
+    #game-container {
+      width: 100%;
+      height: 400px;
+      background-color: #111;
+      position: relative;
+      margin-bottom: 20px;
+      border: 4px solid var(--secondary-color);
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+    }
+    
+    .pixelated {
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>RoundOneJS Mugen Renderer - AI Integration Demo</h1>
+    
+    <div id="game-container"></div>
+    
+    <div class="health-bars">
+      <div>
+        <span>Player 1</span>
+        <div class="health-bar">
+          <div id="p1-health" class="health-bar-fill" style="width: 100%;"></div>
+          <div class="health-text">100/100</div>
+        </div>
+      </div>
+      <div>
+        <span>Player 2</span>
+        <div class="health-bar">
+          <div id="p2-health" class="health-bar-fill" style="width: 100%;"></div>
+          <div class="health-text">100/100</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <div class="control-group">
+        <h2>AI Controls</h2>
+        <div style="margin-bottom: 15px; border-bottom: 1px solid #555; padding-bottom: 10px;">
+          <h3>Player 1</h3>
+          <div>
+            <label for="p1-ai-personality">AI Personality:</label>
+            <select id="p1-ai-personality">
+              <option value="balanced">Balanced</option>
+              <option value="aggressive">Aggressive</option>
+              <option value="defensive">Defensive</option>
+            </select>
+          </div>
+          <div>
+            <label for="p1-ai-model">OpenRouter Model:</label>
+            <select id="p1-ai-model">
+              <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
+              <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet</option>
+              <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
+              <option value="openai/gpt-4o">GPT-4o</option>
+              <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            </select>
+          </div>
+          <div>
+            <button id="p1-toggle-ai">Enable AI Control</button>
+            <button id="p1-use-openrouter">Use OpenRouter</button>
+          </div>
+        </div>
+        
+        <div>
+          <h3>Player 2</h3>
+          <div>
+            <label for="p2-ai-personality">AI Personality:</label>
+            <select id="p2-ai-personality">
+              <option value="balanced">Balanced</option>
+              <option value="aggressive">Aggressive</option>
+              <option value="defensive">Defensive</option>
+            </select>
+          </div>
+          <div>
+            <label for="p2-ai-model">OpenRouter Model:</label>
+            <select id="p2-ai-model">
+              <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
+              <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet</option>
+              <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
+              <option value="openai/gpt-4o">GPT-4o</option>
+              <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            </select>
+          </div>
+          <div>
+            <button id="p2-toggle-ai">Enable AI Control</button>
+            <button id="p2-use-openrouter">Use OpenRouter</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <h2>Game Modes</h2>
+        <div>
+          <button id="vs-mode">VS Mode</button>
+          <button id="arcade-mode">Arcade Mode</button>
+        </div>
+        <div>
+          <label for="arcade-length">Arcade Length:</label>
+          <select id="arcade-length">
+            <option value="short">Short (3 stages)</option>
+            <option value="medium">Medium (6 stages)</option>
+            <option value="long">Long (10 stages)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <h2>Character Generator</h2>
+        <button id="generate-character">Generate Random Character</button>
+        <div>
+          <label for="character-name">Name:</label>
+          <input type="text" id="character-name" placeholder="Character Name">
+        </div>
+        <div id="character-stats" style="margin-top: 10px; display: none;">
+          <div><span>Health:</span> <span id="character-health">100</span></div>
+          <div><span>Speed:</span> <span id="character-speed">5</span></div>
+          <div><span>Power:</span> <span id="character-power">5</span></div>
+          <div><span>Defense:</span> <span id="character-defense">5</span></div>
+          <div><span>Balance:</span> <progress id="character-balance" value="50" max="100"></progress></div>
+        </div>
+        <button id="apply-character">Apply to Player 1</button>
+      </div>
+      
+      <div class="control-group">
+        <h2>Model Testing</h2>
+        <button id="test-models">Test Selected Model</button>
+        <div>
+          <label for="test-matches">Number of Matches:</label>
+          <input type="number" id="test-matches" value="10" min="1" max="100">
+        </div>
+        <button id="generate-report">Generate Report</button>
+      </div>
+      
+      <div class="control-group">
+        <h2>Background Generator</h2>
+        <div>
+          <label for="background-type">Background Type:</label>
+          <select id="background-type">
+            <option value="dojo">Dojo</option>
+            <option value="street">Street</option>
+            <option value="castle">Castle</option>
+            <option value="forest">Forest</option>
+            <option value="beach">Beach</option>
+            <option value="cyberpunk">Cyberpunk</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div id="custom-prompt-container" style="display: none;">
+          <label for="custom-prompt">Custom Prompt:</label>
+          <input type="text" id="custom-prompt" placeholder="Describe your background">
+        </div>
+        <button id="generate-background">Generate Background</button>
+      </div>
+    </div>
+    
+    <div id="report-container" style="margin-top: 20px; background-color: #333; padding: 15px; border-radius: 5px; display: none;">
+      <h2>Test Results</h2>
+      <pre id="report-content" style="white-space: pre-wrap; overflow-x: auto;"></pre>
+    </div>
+  </div>
+  
+  <script type="text/javascript" src="/lib/index.js"></script>
+  <script>
+    // Demo implementation would go here
+    // This would initialize the RoundOneJS app and connect all the AI components
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize game
+      const gameContainer = document.getElementById('game-container');
+      const app = new RoundOneJS.RoundOneJSApp(gameContainer);
+      
+      // Health bar updates
+      function updateHealthBars() {
+        const p1Health = document.getElementById('p1-health');
+        const p2Health = document.getElementById('p2-health');
+        const p1Text = p1Health.nextElementSibling;
+        const p2Text = p2Health.nextElementSibling;
+        
+        const p1Percent = (app.player1.health / app.player1.maxHealth) * 100;
+        const p2Percent = (app.player2.health / app.player2.maxHealth) * 100;
+        
+        p1Health.style.width = p1Percent + '%';
+        p2Health.style.width = p2Percent + '%';
+        
+        p1Text.textContent = `${app.player1.health}/${app.player1.maxHealth}`;
+        p2Text.textContent = `${app.player2.health}/${app.player2.maxHealth}`;
+        
+        // Change color based on health
+        if (p1Percent < 30) {
+          p1Health.style.backgroundColor = '#f44336';
+        } else if (p1Percent < 60) {
+          p1Health.style.backgroundColor = '#ff9800';
+        } else {
+          p1Health.style.backgroundColor = '#4CAF50';
+        }
+        
+        if (p2Percent < 30) {
+          p2Health.style.backgroundColor = '#f44336';
+        } else if (p2Percent < 60) {
+          p2Health.style.backgroundColor = '#ff9800';
+        } else {
+          p2Health.style.backgroundColor = '#4CAF50';
+        }
+      }
+      
+      // Character Generator
+      const generateCharacterButton = document.getElementById('generate-character');
+      const characterNameInput = document.getElementById('character-name');
+      const applyCharacterButton = document.getElementById('apply-character');
+      const characterStats = document.getElementById('character-stats');
+      const characterHealth = document.getElementById('character-health');
+      const characterSpeed = document.getElementById('character-speed');
+      const characterPower = document.getElementById('character-power');
+      const characterDefense = document.getElementById('character-defense');
+      const characterBalance = document.getElementById('character-balance');
+      
+      let characterGenerator = new RoundOneJS.CharacterGenerator();
+      let generatedCharacter = null;
+      
+      generateCharacterButton.addEventListener('click', function() {
+        generatedCharacter = characterGenerator.generateRandomCharacter();
+        characterNameInput.value = generatedCharacter.name;
+        
+        // Display character stats
+        characterHealth.textContent = generatedCharacter.DEF.info.health;
+        characterSpeed.textContent = generatedCharacter.DEF.info.speed;
+        characterPower.textContent = generatedCharacter.DEF.info.power;
+        characterDefense.textContent = generatedCharacter.DEF.info.defense;
+        
+        // Evaluate character balance
+        const balance = characterGenerator.evaluateCharacter(generatedCharacter);
+        characterBalance.value = balance;
+        
+        // Show stats
+        characterStats.style.display = 'block';
+        
+        alert(`Generated character: ${generatedCharacter.name}`);
+      });
+      
+      // Background Generator
+      const backgroundTypeSelect = document.getElementById('background-type');
+      const customPromptContainer = document.getElementById('custom-prompt-container');
+      const customPromptInput = document.getElementById('custom-prompt');
+      const generateBackgroundButton = document.getElementById('generate-background');
+      
+      let backgroundGenerator = null;
+      let currentBackground = null;
+      
+      // Show/hide custom prompt field based on selection
+      backgroundTypeSelect.addEventListener('change', function() {
+        if (backgroundTypeSelect.value === 'custom') {
+          customPromptContainer.style.display = 'block';
+        } else {
+          customPromptContainer.style.display = 'none';
+        }
+      });
+      
+      generateBackgroundButton.addEventListener('click', async function() {
+        try {
+          const apiKey = process.env.FAL_KEY;
+          if (!apiKey) {
+            alert('FAL API key not found. Please set the FAL_KEY environment variable.');
+            return;
+          }
+          
+          if (!backgroundGenerator) {
+            backgroundGenerator = new RoundOneJS.BackgroundGenerator(apiKey);
+          }
+          
+          const selectedType = backgroundTypeSelect.value;
+          let background;
+          
+          generateBackgroundButton.textContent = 'Generating...';
+          generateBackgroundButton.disabled = true;
+          
+          if (selectedType === 'custom') {
+            const customPrompt = customPromptInput.value.trim();
+            if (!customPrompt) {
+              alert('Please enter a custom prompt');
+              generateBackgroundButton.textContent = 'Generate Background';
+              generateBackgroundButton.disabled = false;
+              return;
+            }
+            
+            background = await backgroundGenerator.generateBackgroundByPrompt(customPrompt);
+          } else {
+            background = await backgroundGenerator.generateBackgroundByType(selectedType);
+          }
+          
+          // Set the background image
+          if (background && background.url) {
+            currentBackground = background;
+            gameContainer.style.backgroundImage = `url(${background.url})`;
+            
+            // Also set as body background with overlay
+            document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 51, 0.9), rgba(0, 0, 51, 0.9)), url(${background.url})`;
+          }
+          
+          generateBackgroundButton.textContent = 'Generate Background';
+          generateBackgroundButton.disabled = false;
+        } catch (error) {
+          console.error('Error generating background:', error);
+          alert(`Error generating background: ${error.message}`);
+          generateBackgroundButton.textContent = 'Generate Background';
+          generateBackgroundButton.disabled = false;
+        }
+      });
+      
+      // Game loop
+      function gameLoop() {
+        // Update health bars
+        updateHealthBars();
+        
+        // Request next frame
+        requestAnimationFrame(gameLoop);
+      }
+      
+      // Start game loop
+      gameLoop();
+    });
+  </script>
+</body>
+</html>
+||||||| d4bb575
+=======
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RoundOneJS Mugen Renderer - AI Integration Demo</title>
   <style>
     body {
       font-family: Arial, sans-serif;

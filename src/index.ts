@@ -8,3 +8,5 @@ export {OpenRouterAIController} from './ai/OpenRouterAIController';
 export {ArcadeMode, ArcadeLength, ArcadeStage} from './arcade/ArcadeMode';
 export {CharacterGenerator, CharacterTemplate, CharacterResource} from './character-generator/CharacterGenerator';
 export {ModelTester, ModelTestResult} from './openrouter/ModelTester';
+export {BackgroundGenerator} from './background-generator/BackgroundGenerator';
+export {BackgroundType, FalBackground} from './background-generator/types';
