@@ -10,3 +10,4 @@ export {CharacterGenerator, CharacterTemplate, CharacterResource} from './charac
 export {ModelTester, ModelTestResult} from './openrouter/ModelTester';
 export {BackgroundGenerator} from './background-generator/BackgroundGenerator';
 export {BackgroundType, FalBackground} from './background-generator/types';
+export {ENV, setApiKey} from './env';
