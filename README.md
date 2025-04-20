@@ -41,7 +41,9 @@ The project includes a comprehensive demo that showcases these research areas:
 - Arcade mode with dynamic difficulty can be experienced
 - Model testing framework provides performance metrics
 
-### OpenRouter API Integration
+### API Integrations
+
+#### OpenRouter API Integration
 
 This project uses OpenRouter to connect with various AI models for enhanced decision-making. To set up the OpenRouter integration:
 
@@ -79,6 +81,85 @@ This project uses OpenRouter to connect with various AI models for enhanced deci
      - Claude 3 Sonnet (`anthropic/claude-3-sonnet`)
      - GPT-4o (`openai/gpt-4o`)
      - And other models available through OpenRouter
+
+#### Background Generation with fal.ai
+
+The demo includes integration with fal.ai for generating dynamic fighting game backgrounds:
+
+1. **Get an API Key**:
+   - Create an account at [fal.ai](https://fal.ai/)
+   - Generate an API key from your dashboard
+
+2. **Set Up Environment Variable**:
+   - Set the `FAL_KEY` environment variable with your API key:
+     ```bash
+     # Linux/macOS
+     export FAL_KEY="your-api-key-here"
+     
+     # Windows (Command Prompt)
+     set FAL_KEY=your-api-key-here
+     
+     # Windows (PowerShell)
+     $env:FAL_KEY="your-api-key-here"
+     ```
+
+3. **Alternative Configuration**:
+   - You can also modify `src/background-generator/config.ts` to include your API key directly:
+     ```typescript
+     export const FAL_CONFIG = {
+       API_KEY: "your-api-key-here", // Replace with your actual API key
+       DEFAULT_BACKGROUND_TYPE: 'dojo',
+       API_ENDPOINT: 'https://api.fal.ai/text-to-image'
+     };
+     ```
+
+## Running the Demo Locally
+
+To run the AI integration demo locally, follow these steps:
+
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/decision-crafters/roundonejs_mugen_renderer.git
+   cd roundonejs_mugen_renderer
+   ```
+
+2. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Set Up API Keys**:
+   - Set up the OpenRouter API key as described in the [OpenRouter API Integration](#openrouter-api-integration) section
+   - Set up the fal.ai API key as described in the [Background Generation with fal.ai](#background-generation-with-falai) section
+
+4. **Build the Project**:
+   ```bash
+   npm run build
+   ```
+
+5. **Run a Local Server**:
+   You can use any HTTP server to serve the files. For example:
+   ```bash
+   # Using Node.js http-server (install with: npm install -g http-server)
+   http-server -p 8080
+   
+   # Or using Python's built-in HTTP server
+   python -m http.server 8080
+   ```
+
+6. **Access the Demo Page**:
+   Open your browser and navigate to:
+   ```
+   http://localhost:8080/src/demo/index.html
+   ```
+
+7. **Using the Demo**:
+   - Select AI personalities and models for both players
+   - Enable AI control for one or both players
+   - Generate backgrounds using the Background Generator
+   - Test different game modes including Arcade Mode
+   - Generate random characters and apply them to players
+   - Run model testing to compare different AI models
 
 ## About M.U.G.E.N.
 
