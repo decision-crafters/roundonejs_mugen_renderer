@@ -33,7 +33,7 @@ jobs:
       run: npm test || echo "No tests available, skipping"
     
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dist-files-${{ matrix.node-version }}
         path: dist/
