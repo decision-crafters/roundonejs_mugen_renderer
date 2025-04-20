@@ -1,5 +1,7 @@
+import { ENV } from '../env';
+
 export const FAL_CONFIG = {
-  API_KEY: process.env.FAL_KEY || '',
+  API_KEY: ENV.FAL_KEY || '',
   DEFAULT_BACKGROUND_TYPE: 'dojo',
   API_ENDPOINT: 'https://api.fal.ai/text-to-image'
 };
